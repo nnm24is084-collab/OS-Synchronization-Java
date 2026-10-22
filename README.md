@@ -1,314 +1,190 @@
-\# Operating Systems Programming Assignment
+# OS Synchronization in Java
 
-\## AI-Assisted Synchronization Algorithms with Program-Generated HTML Simulation
+## Operating Systems Programming Assignment
 
+Project Title: AI-Assisted Synchronization Algorithms with Program-Generated HTML Simulation
 
+**Problems Covered:**
+- Readers-Writers Problem
+- Dining Philosophers Problem
 
-\*\*Student Name:\*\* Anushka Garthe  
+**Synchronization Techniques:**
+- Semaphore
+- Monitor
 
-\*\*USN:\*\* \[Enter your USN]  
+ 1. Overview
 
-\*\*Course:\*\* Operating Systems  
+This project demonstrates two classic operating system synchronization problems using Java. It explores how threads coordinate access to shared resources and how synchronization mechanisms help prevent race conditions and resource conflicts.
 
-\*\*Programming Language:\*\* Java  
+The project includes Java implementations, HTML simulations, screenshots, assignment documentation, AI prompts, and references.
 
-\*\*GitHub Repository:\*\* \[Add your repository URL]
+ 2. Objectives
 
+- Understand thread synchronization and shared resources.
+- Implement the Readers-Writers problem using semaphores and monitors.
+- Implement the Dining Philosophers problem using semaphores and monitors.
+- Demonstrate synchronization behavior through HTML simulations.
+- Document implementation decisions, observations, and references.
 
+ 3. Project Structure
 
-\## 1. Project Overview
-
-
-
-This project implements two classical operating system synchronization problems using semaphore-based and monitor-based approaches.
-
-
-
-The four implementations are:
-
-
-
-1\. Readers–Writers using Semaphores
-
-2\. Readers–Writers using Monitors
-
-3\. Dining Philosophers using Semaphores
-
-4\. Dining Philosophers using Monitors
-
-
-
-Each implementation generates an HTML visualization based on execution and state data produced by the Java program.
-
-
-
-\## 2. Technologies Used
-
-
-
-\- Java and JDK
-
-\- Java concurrency and synchronization utilities
-
-\- HTML, CSS and JavaScript for browser-based visualizations
-
-\- Visual Studio Code and PowerShell
-
-\- Git and GitHub for version control
-
-
-
-\## 3. Project Structure
-
-
-
-```text
 
 OS-Synchronization-Java/
-
-├── readers\_writers/
-
+├── README.md
+├── run.bat
+├── run.sh
+├── readers_writers/
 │   ├── semaphore/
-
 │   └── monitor/
-
-├── dining\_philosophers/
-
+├── dining_philosophers/
 │   ├── semaphore/
-
 │   └── monitor/
-
-├── generated\_html/
-
-│   ├── readers\_writers\_semaphore.html
-
-│   ├── readers\_writers\_monitor.html
-
-│   ├── dining\_philosophers\_semaphore.html
-
-│   └── dining\_philosophers\_monitor.html
-
+├── generated_html/
+│   ├── readers_writers_semaphore.html
+│   ├── readers_writers_monitor.html
+│   ├── dining_philosophers_semaphore.html
+│   └── dining_philosophers_monitor.html
 ├── screenshots/
-
-├── ai\_prompts/
-
+│   ├── readers_writers_semaphore.png
+│   ├── readers_writers_monitor.png
+│   ├── dining_philosophers_semaphore.png
+│   └── dining_philosophers_monitor.png
+├── ai_prompts/
 │   └── prompts.md
-
 ├── references/
-
 │   └── references.md
+└── report/
+    └── Assignment_Report_Anushka_Garthe_NNM24IS084.docx
 
-├── report/
+ 4. Problem Descriptions
 
-└── README.md
+4.1 Readers-Writers Problem
 
-```
+The Readers-Writers problem involves multiple threads accessing a shared resource.
 
+- Multiple readers may read the shared resource simultaneously.
+- A writer requires exclusive access.
+- Readers must not access the resource while a writer is writing.
+- Synchronization must prevent conflicting access.
 
+ 4.2 Dining Philosophers Problem
 
-\## 4. Compilation and Execution
+The Dining Philosophers problem models multiple philosophers sharing a limited number of forks.
 
+- Each philosopher alternates between thinking and eating.
+- A philosopher needs two forks to eat.
+- Fork access must be synchronized.
+- The implementation should prevent conflicting fork usage and avoid deadlock under its synchronization rules.
 
+ 5. Synchronization Approaches
 
-Open PowerShell in the project root directory.
+Semaphore-Based Solutions
 
+Semaphores coordinate access to shared resources through acquire and release operations. They can limit concurrent access and enforce resource availability.
 
+ Monitor-Based Solutions
 
-\### Readers–Writers: Semaphore
+Monitors coordinate threads through shared state, mutual exclusion, and condition-based waiting or notification. They provide a structured way to control access to shared resources.
 
+The exact behavior and guarantees depend on the implementation of each solution.
 
+6. Technologies Used
 
-```powershell
+- **Programming language:** Java
+- **Synchronization:** Semaphores and monitors
+- **Visualization:** HTML
+- **Development environment:** Visual Studio Code
+- **Version control:** Git
+- **Repository hosting:** GitHub
 
-javac .\\readers\_writers\\semaphore\\ReadersWritersSemaphore.java
+ 7. Requirements
 
-java -cp .\\readers\_writers\\semaphore ReadersWritersSemaphore
+Install the Java Development Kit (JDK) and ensure the Java compiler is available in your terminal.
 
-```
+Check the installation:
 
-
-
-\### Readers–Writers: Monitor
-
-
-
-```powershell
-
-javac .\\readers\_writers\\monitor\\ReadersWritersMonitor.java
-
-java -cp .\\readers\_writers\\monitor ReadersWritersMonitor
-
-```
-
-
-
-\### Dining Philosophers: Semaphore
-
-
-
-```powershell
-
-javac .\\dining\_philosophers\\semaphore\\DiningPhilosophersSemaphore.java
-
-java -cp .\\dining\_philosophers\\semaphore DiningPhilosophersSemaphore
-
-```
+```bash
+java -version
+javac -version
 
 
+Git is required to clone or manage the repository.
 
-\### Dining Philosophers: Monitor
+ 8. How to Run
 
 
 
-```powershell
-
-javac .\\dining\_philosophers\\monitor\\DiningPhilosophersMonitor.java
-
-java -cp .\\dining\_philosophers\\monitor DiningPhilosophersMonitor
-
-```
-
-
-
-If a compilation command reports a missing class or dependency, follow the instructions for the actual source files in that implementation.
-
-
-
-\## 5. Viewing HTML Simulations
-
-
-
-After executing an implementation, open the generated HTML file in a browser.
-
-
-
-To open the folder containing all simulations:
-
-
+Open PowerShell in the project root directory and run:
 
 ```powershell
-
-explorer .\\generated\_html
-
+.\run.bat
 ```
 
+The script compiles the four main Java source files. After successful compilation, open the corresponding HTML files in the `generated_html` folder in a web browser to view the existing simulations.
 
+ Linux or macOS
 
-The four generated HTML files are:
+Make the shell script executable:
 
+```bash
+chmod +x run.sh
+```
 
+Then run:
 
-\- `readers\_writers\_semaphore.html`
+```bash
+./run.sh
+```
 
-\- `readers\_writers\_monitor.html`
+The shell script compiles the four main Java source files. Open the HTML files in `generated_html` in a browser to view the existing simulations.
 
-\- `dining\_philosophers\_semaphore.html`
+**Note:** These scripts compile the Java source files; they do not regenerate the HTML simulations. If compilation fails because a source file depends on additional Java files, compile the required source files together.
 
-\- `dining\_philosophers\_monitor.html`
+ 9. HTML Simulations
 
+The project includes four HTML simulation files:
 
+| Simulation | File |
+|---|---|
+| Readers-Writers using Semaphore | `generated_html/readers_writers_semaphore.html` |
+| Readers-Writers using Monitor | `generated_html/readers_writers_monitor.html` |
+| Dining Philosophers using Semaphore | `generated_html/dining_philosophers_semaphore.html` |
+| Dining Philosophers using Monitor | `generated_html/dining_philosophers_monitor.html` |
 
-The simulations should reflect the execution data recorded by their corresponding Java programs.
+Open any of these files in a web browser to inspect the generated visualization.
 
+ 10. Screenshots
 
+The `screenshots/` directory contains screenshots of the four simulations. These images document the visual output for the assignment.
 
-\## 6. Synchronization Concepts
+ 11. Documentation
 
+- **Assignment report:** `report/`
+- **AI prompts used during development:** `ai_prompts/prompts.md`
+- **References:** `references/references.md`
 
+Refer to these files for the report, development prompts, and supporting references.
 
-\### Readers–Writers Problem
+ 12. Expected Learning Outcomes
 
+After completing this project, students should be able to:
 
+- Explain the need for synchronization in concurrent programs.
+- Distinguish semaphore-based and monitor-based synchronization.
+- Identify race conditions and resource conflicts.
+- Explain the Readers-Writers and Dining Philosophers problems.
+- Run Java implementations and inspect HTML simulations.
+- Use Git and GitHub to maintain and share project files.
 
-Multiple readers may access a shared resource simultaneously, provided no writer is modifying it. Writers require exclusive access to prevent conflicting operations.
+ 13. Author
 
+**Name:** Anushka Garthe  
+**USN:** NNM24IS084  
+**Course:** Operating Systems
+ 
 
+GitHub: https://github.com/nnm24is084-collab/OS-Synchronization-Java
 
-\### Dining Philosophers Problem
+---
 
-
-
-Four philosophers share four forks. Each philosopher needs the two adjacent forks to eat. The synchronization algorithm must prevent adjacent philosophers from eating simultaneously and address deadlock.
-
-
-
-\### Race Conditions
-
-
-
-A race condition occurs when concurrent operations access shared data without sufficient coordination, potentially producing inconsistent results.
-
-
-
-\### Mutual Exclusion
-
-
-
-Mutual exclusion ensures that conflicting operations do not enter a protected critical section simultaneously.
-
-
-
-\### Deadlock
-
-
-
-Deadlock occurs when processes or threads remain blocked indefinitely while waiting for resources held by one another.
-
-
-
-\### Starvation
-
-
-
-Starvation occurs when a thread waits indefinitely because other threads repeatedly obtain the resources it needs.
-
-
-
-\## 7. Screenshots and Testing Evidence
-
-
-
-The `screenshots/` directory contains screenshots of program execution and HTML simulations.
-
-
-
-Screenshots should demonstrate the actual outputs of the four implementations. The source code and HTML visualizations should be tested before submission.
-
-
-
-\## 8. AI Assistance
-
-
-
-AI tools were used as programming and debugging assistants during development. Their assistance included explaining synchronization concepts, helping diagnose compilation issues, improving visualization behavior, and preparing documentation.
-
-
-
-The specific tools, prompts, changes made, and limitations identified are documented in `ai\_prompts/prompts.md`. This disclosure should be updated to accurately reflect the tools and assistance actually used.
-
-
-
-\## 9. References
-
-
-
-Technical references and documentation are listed in `references/references.md`.
-
-
-
-\## 10. Limitations
-
-
-
-The behavior of each solution depends on its synchronization policy and implementation. Starvation prevention should not be claimed unless it is supported by the actual algorithm. HTML visualizations should be regenerated from the corresponding program execution.
-
-
-
-\## 11. Academic Integrity
-
-
-
-I am responsible for testing, understanding, and explaining the submitted implementations. AI assistance and external references must be disclosed, and the final report must accurately describe the actual code and observed results.
-
-
-
+*Academic project created for the Operating Systems Programming Assignment.*
