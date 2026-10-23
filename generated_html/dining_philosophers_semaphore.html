@@ -1,77 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dining Philosophers - Semaphore</title>
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dining Philosophers Semaphore</title>
 <style>
-*{box-sizing:border-box}body{margin:0;padding:24px;background:#f3f5f9;color:#202b3c;font:15px Arial,sans-serif}
-main{max-width:1150px;margin:auto}.card{background:white;border:1px solid #e1e6ef;border-radius:14px;padding:20px;margin:16px 0;box-shadow:0 3px 12px #1d355708}
-h1{margin:0 0 8px}h2{font-size:19px;margin-top:0}.muted{color:#68758a}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-button{border:0;border-radius:8px;padding:10px 17px;background:#315ee8;color:white;cursor:pointer;font-weight:bold}button.secondary{background:#e9edf5;color:#26354b}
-input[type=range]{flex:1;min-width:200px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-#table{width:100%;max-height:400px}.lane{display:grid;grid-template-columns:55px 1fr 55px;gap:10px;align-items:center;margin:13px 0}
-.track{height:24px;background:#eef1f7;border-radius:6px;position:relative;overflow:hidden}
-.segment{position:absolute;top:0;height:100%;border-radius:4px;opacity:.9}
-.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px;border-bottom:1px solid #edf0f5}th{background:#f7f8fb;position:sticky;top:0}
-.log{max-height:310px;overflow:auto}.active{background:#fff6d9} .status{font-weight:bold}
-@media(max-width:750px){.layout{grid-template-columns:1fr}body{padding:12px}}
-</style>
-</head>
-<body><main>
-<div class="card"><h1>Dining Philosophers</h1>
-<div class="muted">Semaphore solution · Four philosophers · Three meals each · Exclusive eating permit</div>
-<p><b>Rule:</b> Only one philosopher can eat at a time.</p></div>
-<div class="card"><h2>Simulation controls</h2><div class="controls">
-<button id="play">▶ Play</button><button id="step" class="secondary">Step</button><button id="reset" class="secondary">Reset</button>
-<label>Speed <select id="speed"><option value="1000">0.5×</option><option value="500" selected>1×</option><option value="150">3×</option></select></label>
-</div><p><input id="slider" type="range" min="0" value="0" step="1"><span id="counter">Event 0</span></p>
-<div id="status" class="status">Ready</div></div>
-<div class="layout"><div class="card"><h2>Circular table</h2>
-<svg id="table" viewBox="0 0 400 360" aria-label="Four philosophers around a table">
-<circle cx="200" cy="180" r="94" fill="#f2e9db" stroke="#d6c4a9" stroke-width="3"/>
-<circle cx="200" cy="180" r="48" fill="#fff" stroke="#d6c4a9" stroke-width="2"/>
-<text x="200" y="175" text-anchor="middle" font-size="13" fill="#65594b">DINING</text>
-<text x="200" y="192" text-anchor="middle" font-size="13" fill="#65594b">TABLE</text>
-<g id="nodes"></g></svg>
-<div class="legend"><span><i class="dot" style="background:#9aa5b5"></i>Thinking</span><span><i class="dot" style="background:#eab308"></i>Waiting</span><span><i class="dot" style="background:#22a06b"></i>Eating</span><span><i class="dot" style="background:#647de8"></i>Finished</span></div></div>
-<div class="card"><h2>Current state</h2><div id="current"></div><p id="permit" class="muted"></p></div></div>
-<div class="card"><h2>Execution timeline</h2><div id="timeline"></div></div>
-<div class="card"><h2>Event log</h2><div class="log"><table><thead><tr><th>Time</th><th>Philosopher</th><th>State</th><th>Event</th></tr></thead><tbody id="log"></tbody></table></div></div>
-</main>
-<script>
-const events=[["8","P0","THINKING","Thinking","0","0"],["18","P3","THINKING","Thinking","3","0"],["19","P2","THINKING","Thinking","2","0"],["19","P1","THINKING","Thinking","1","0"],["269","P3","WAITING","Waiting for the eating permit","3","0"],["270","P0","WAITING","Waiting for the eating permit","0","0"],["270","P3","WAITING","Permit acquired; picking up forks","3","0"],["271","P1","WAITING","Waiting for the eating permit","1","0"],["271","P2","WAITING","Waiting for the eating permit","2","0"],["272","P3","PICKING","Picked up fork F3","3","0"],["272","P3","PICKING","Picked up fork F0","3","0"],["273","P3","EATING","Eating meal 1 of 3","3","1"],["632","P3","THINKING","Finished meal 1","3","1"],["633","P3","THINKING","Released fork F0","3","1"],["634","P3","THINKING","Released fork F3","3","1"],["634","P0","WAITING","Permit acquired; picking up forks","0","0"],["635","P0","PICKING","Picked up fork F0","0","0"],["635","P0","PICKING","Picked up fork F1","0","0"],["636","P0","EATING","Eating meal 1 of 3","0","1"],["899","P3","WAITING","Waiting for the eating permit","3","1"],["991","P0","THINKING","Finished meal 1","0","1"],["994","P0","THINKING","Released fork F1","0","1"],["995","P0","THINKING","Released fork F0","0","1"],["996","P1","WAITING","Permit acquired; picking up forks","1","0"],["996","P1","PICKING","Picked up fork F1","1","0"],["996","P1","PICKING","Picked up fork F2","1","0"],["997","P1","EATING","Eating meal 1 of 3","1","1"],["1257","P0","WAITING","Waiting for the eating permit","0","1"],["1350","P1","THINKING","Finished meal 1","1","1"],["1354","P1","THINKING","Released fork F2","1","1"],["1356","P1","THINKING","Released fork F1","1","1"],["1357","P2","WAITING","Permit acquired; picking up forks","2","0"],["1357","P2","PICKING","Picked up fork F2","2","0"],["1358","P2","PICKING","Picked up fork F3","2","0"],["1359","P2","EATING","Eating meal 1 of 3","2","1"],["1616","P1","WAITING","Waiting for the eating permit","1","1"],["1710","P2","THINKING","Finished meal 1","2","1"],["1714","P2","THINKING","Released fork F3","2","1"],["1716","P2","THINKING","Released fork F2","2","1"],["1716","P3","WAITING","Permit acquired; picking up forks","3","1"],["1717","P3","PICKING","Picked up fork F3","3","1"],["1718","P3","PICKING","Picked up fork F0","3","1"],["1718","P3","EATING","Eating meal 2 of 3","3","2"],["1975","P2","WAITING","Waiting for the eating permit","2","1"],["2084","P3","THINKING","Finished meal 2","3","2"],["2085","P3","THINKING","Released fork F0","3","2"],["2085","P3","THINKING","Released fork F3","3","2"],["2086","P0","WAITING","Permit acquired; picking up forks","0","1"],["2086","P0","PICKING","Picked up fork F0","0","1"],["2087","P0","PICKING","Picked up fork F1","0","1"],["2087","P0","EATING","Eating meal 2 of 3","0","2"],["2349","P3","WAITING","Waiting for the eating permit","3","2"],["2443","P0","THINKING","Finished meal 2","0","2"],["2446","P0","THINKING","Released fork F1","0","2"],["2447","P0","THINKING","Released fork F0","0","2"],["2449","P1","WAITING","Permit acquired; picking up forks","1","1"],["2450","P1","PICKING","Picked up fork F1","1","1"],["2451","P1","PICKING","Picked up fork F2","1","1"],["2451","P1","EATING","Eating meal 2 of 3","1","2"],["2707","P0","WAITING","Waiting for the eating permit","0","2"],["2817","P1","THINKING","Finished meal 2","1","2"],["2819","P1","THINKING","Released fork F2","1","2"],["2821","P1","THINKING","Released fork F1","1","2"],["2822","P2","WAITING","Permit acquired; picking up forks","2","1"],["2823","P2","PICKING","Picked up fork F2","2","1"],["2824","P2","PICKING","Picked up fork F3","2","1"],["2824","P2","EATING","Eating meal 2 of 3","2","2"],["3083","P1","WAITING","Waiting for the eating permit","1","2"],["3177","P2","THINKING","Finished meal 2","2","2"],["3180","P2","THINKING","Released fork F3","2","2"],["3182","P2","THINKING","Released fork F2","2","2"],["3183","P3","WAITING","Permit acquired; picking up forks","3","2"],["3184","P3","PICKING","Picked up fork F3","3","2"],["3185","P3","PICKING","Picked up fork F0","3","2"],["3186","P3","EATING","Eating meal 3 of 3","3","3"],["3441","P2","WAITING","Waiting for the eating permit","2","2"],["3551","P3","THINKING","Finished meal 3","3","3"],["3551","P3","THINKING","Released fork F0","3","3"],["3551","P3","THINKING","Released fork F3","3","3"],["3552","P3","FINISHED","Completed all 3 meals","3","3"],["3552","P0","WAITING","Permit acquired; picking up forks","0","2"],["3553","P0","PICKING","Picked up fork F0","0","2"],["3553","P0","PICKING","Picked up fork F1","0","2"],["3553","P0","EATING","Eating meal 3 of 3","0","3"],["3907","P0","THINKING","Finished meal 3","0","3"],["3907","P0","THINKING","Released fork F1","0","3"],["3908","P0","THINKING","Released fork F0","0","3"],["3908","P0","FINISHED","Completed all 3 meals","0","3"],["3909","P1","WAITING","Permit acquired; picking up forks","1","2"],["3909","P1","PICKING","Picked up fork F1","1","2"],["3909","P1","PICKING","Picked up fork F2","1","2"],["3909","P1","EATING","Eating meal 3 of 3","1","3"],["4269","P1","THINKING","Finished meal 3","1","3"],["4269","P1","THINKING","Released fork F2","1","3"],["4270","P1","THINKING","Released fork F1","1","3"],["4270","P2","WAITING","Permit acquired; picking up forks","2","2"],["4271","P2","PICKING","Picked up fork F2","2","2"],["4271","P1","FINISHED","Completed all 3 meals","1","3"],["4271","P2","PICKING","Picked up fork F3","2","2"],["4272","P2","EATING","Eating meal 3 of 3","2","3"],["4626","P2","THINKING","Finished meal 3","2","3"],["4626","P2","THINKING","Released fork F3","2","3"],["4626","P2","THINKING","Released fork F2","2","3"],["4627","P2","FINISHED","Completed all 3 meals","2","3"]];
-const colors={THINKING:'#9aa5b5',WAITING:'#eab308',PICKING:'#eab308',EATING:'#22a06b',FINISHED:'#647de8',INTERRUPTED:'#dc2626'};
-let index=0,timer=null;
-const slider=document.getElementById('slider');slider.max=Math.max(0,events.length-1);
-const nodes=document.getElementById('nodes');
-for(let i=0;i<4;i++){
- const a=(-90+i*90)*Math.PI/180,x=200+Math.cos(a)*133,y=180+Math.sin(a)*133;
- nodes.innerHTML+=`<g id="p${i}"><circle cx="${x}" cy="${y}" r="30" fill="#9aa5b5" stroke="white" stroke-width="3"/><text x="${x}" y="${y-2}" text-anchor="middle" fill="white" font-weight="bold">P${i}</text><text id="s${i}" x="${x}" y="${y+13}" text-anchor="middle" fill="white" font-size="9">THINKING</text></g>`;
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;color:#233047;font:13px Arial}
+main{max-width:1250px;margin:auto;padding:12px}
+h1{font-size:20px;margin:0 0 5px}h2{font-size:15px;margin:0 0 12px}
+.sub{color:#64748b;margin-bottom:12px}.card{background:white;border:1px solid #d9e0eb;border-radius:11px;padding:12px;margin-bottom:12px}
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+button,select{padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#1e293b;cursor:pointer}
+button:hover{background:#eef2ff}input[type=range]{flex:1;min-width:100px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:#64748b;margin-top:9px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px}
+.THINKING{background:#6485ff}.HUNGRY{background:#f5a000}.ACQUIRING{background:#a64ff0}.EATING{background:#20a06b}.RELEASING{background:#f97316}.FINISHED{background:#64748b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.visual{display:grid;grid-template-columns:1fr 1.2fr;align-items:center;gap:10px}
+svg{width:100%;max-height:340px}.person{cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:12px}td,th{text-align:left;padding:5px;border-bottom:1px solid #dbe2ed}
+th{font-weight:bold} .pill{display:inline-block;color:white;padding:3px 8px;border-radius:12px;font-weight:bold}
+.small{color:#64748b;font-size:11px}.timeline{display:grid;grid-template-columns:30px 1fr;gap:7px;align-items:center;margin:7px 0}
+.track{height:14px;background:#edf0f5;position:relative;border-radius:3px;overflow:hidden}
+.seg{position:absolute;top:0;height:100%}.now{position:absolute;top:-3px;bottom:-3px;width:2px;background:#2563eb;z-index:2}
+.eventlog{height:175px;overflow:auto;border:1px solid #d9e0eb;border-radius:7px;font:11px Consolas,monospace}
+.line{padding:3px 6px;white-space:pre-wrap;cursor:pointer;color:#475569}
+.line:hover,.selected{background:#4778ff;color:white}
+@media(max-width:760px){.grid,.visual{grid-template-columns:1fr}main{padding:7px}}
+</style></head><body><main>
+<h1>Dining Philosophers (4) - Semaphore Solution</h1>
+<div class="sub">Semaphores: fork[0..3] = 1 each, room = 3 (at most N−1 philosophers compete → no deadlock) — generated from Java execution trace</div>
+<div class="card"><div class="controls">
+<button id="play">▶ Play</button><button id="step">Step ▶|</button><button id="reset">↺ Reset</button>
+<label>Speed <select id="speed"><option>0.5x</option><option selected>1x</option><option>2x</option><option>4x</option></select></label>
+<input id="slider" type="range" min="0" value="0">
+<span id="time" class="small"></span></div>
+<div class="legend"><span><i class="dot THINKING"></i>THINKING</span><span><i class="dot HUNGRY"></i>HUNGRY</span><span><i class="dot ACQUIRING"></i>ACQUIRING</span><span><i class="dot EATING"></i>EATING</span><span><i class="dot RELEASING"></i>RELEASING</span></div></div>
+<div class="card visual">
+<div><svg id="table" viewBox="0 0 390 370">
+<circle cx="195" cy="185" r="88" fill="none" stroke="#a7b3c7" stroke-width="3" stroke-dasharray="4 4"/>
+<text x="195" y="189" text-anchor="middle" fill="#94a3b8">TABLE</text><g id="forks"></g><g id="people"></g>
+</svg></div>
+<div><table><thead><tr><th>Philosopher</th><th>State</th><th>Forks held</th><th>Meals</th></tr></thead><tbody id="pt"></tbody></table>
+<br><table><thead><tr><th>Fork</th><th>Status</th></tr></thead><tbody id="ft"></tbody></table>
+<p id="deadlock" class="small"></p></div></div>
+<div class="card"><h2>Timeline <span class="small">(one lane per thread; blue line = current time)</span></h2><div id="timeline"></div></div>
+<div class="card"><h2>Event log <span class="small">(click a line to jump to it)</span></h2><div class="eventlog" id="log"></div></div>
+</main><script>
+const E=[["2","P1","THINKING","Thinking","1","0"],["35","P3","THINKING","Thinking","3","0"],["37","P0","THINKING","Thinking","0","0"],["39","P2","THINKING","Thinking","2","0"],["287","P1","HUNGRY","Hungry; trying to enter room","1","0"],["292","P0","HUNGRY","Hungry; trying to enter room","0","0"],["299","P3","HUNGRY","Hungry; trying to enter room","3","0"],["310","P2","HUNGRY","Hungry; trying to enter room","2","0"],["314","P3","ACQUIRING","Entered room; trying to take forks F3 and F0","3","0"],["315","P0","ACQUIRING","Entered room; trying to take forks F0 and F1","0","0"],["317","P0","ACQUIRING","Picked up left fork F0","0","0"],["318","P0","ACQUIRING","Picked up right fork F1","0","0"],["320","P1","ACQUIRING","Entered room; trying to take forks F1 and F2","1","0"],["322","P3","ACQUIRING","Picked up left fork F3","3","0"],["324","P0","EATING","Eating meal 1 of 3","0","1"],["928","P1","ACQUIRING","Picked up left fork F1","1","0"],["930","P0","RELEASING","Put down right fork F1","0","1"],["931","P1","ACQUIRING","Picked up right fork F2","1","0"],["932","P0","RELEASING","Put down left fork F0","0","1"],["932","P3","ACQUIRING","Picked up right fork F0","3","0"],["933","P2","ACQUIRING","Entered room; trying to take forks F2 and F3","2","0"],["934","P0","THINKING","Back to thinking","0","1"],["935","P0","THINKING","Thinking","0","1"],["936","P1","EATING","Eating meal 1 of 3","1","1"],["937","P3","EATING","Eating meal 1 of 3","3","1"],["1193","P0","HUNGRY","Hungry; trying to enter room","0","1"],["1538","P1","RELEASING","Put down right fork F2","1","1"],["1542","P3","RELEASING","Put down right fork F0","3","1"],["1544","P3","RELEASING","Put down left fork F3","3","1"],["1546","P2","ACQUIRING","Picked up left fork F2","2","0"],["1548","P0","ACQUIRING","Entered room; trying to take forks F0 and F1","0","1"],["1550","P3","THINKING","Back to thinking","3","1"],["1551","P3","THINKING","Thinking","3","1"],["1552","P1","RELEASING","Put down left fork F1","1","1"],["1554","P1","THINKING","Back to thinking","1","1"],["1556","P1","THINKING","Thinking","1","1"],["1557","P0","ACQUIRING","Picked up left fork F0","0","1"],["1558","P2","ACQUIRING","Picked up right fork F3","2","0"],["1559","P2","EATING","Eating meal 1 of 3","2","1"],["1561","P0","ACQUIRING","Picked up right fork F1","0","1"],["1562","P0","EATING","Eating meal 2 of 3","0","2"],["1803","P3","HUNGRY","Hungry; trying to enter room","3","1"],["1806","P3","ACQUIRING","Entered room; trying to take forks F3 and F0","3","1"],["1819","P1","HUNGRY","Hungry; trying to enter room","1","1"],["2163","P3","ACQUIRING","Picked up left fork F3","3","1"],["2164","P2","RELEASING","Put down right fork F3","2","1"],["2166","P0","RELEASING","Put down right fork F1","0","2"],["2167","P2","RELEASING","Put down left fork F2","2","1"],["2168","P2","THINKING","Back to thinking","2","1"],["2170","P2","THINKING","Thinking","2","1"],["2171","P3","ACQUIRING","Picked up right fork F0","3","1"],["2172","P0","RELEASING","Put down left fork F0","0","2"],["2173","P0","THINKING","Back to thinking","0","2"],["2174","P0","THINKING","Thinking","0","2"],["2175","P3","EATING","Eating meal 2 of 3","3","2"],["2176","P1","ACQUIRING","Entered room; trying to take forks F1 and F2","1","1"],["2178","P1","ACQUIRING","Picked up left fork F1","1","1"],["2179","P1","ACQUIRING","Picked up right fork F2","1","1"],["2180","P1","EATING","Eating meal 2 of 3","1","2"],["2421","P2","HUNGRY","Hungry; trying to enter room","2","1"],["2424","P2","ACQUIRING","Entered room; trying to take forks F2 and F3","2","1"],["2430","P0","HUNGRY","Hungry; trying to enter room","0","2"],["2790","P3","RELEASING","Put down right fork F0","3","2"],["2790","P2","ACQUIRING","Picked up left fork F2","2","1"],["2792","P2","ACQUIRING","Picked up right fork F3","2","1"],["2793","P1","RELEASING","Put down right fork F2","1","2"],["2794","P2","EATING","Eating meal 2 of 3","2","2"],["2796","P3","RELEASING","Put down left fork F3","3","2"],["2797","P1","RELEASING","Put down left fork F1","1","2"],["2798","P1","THINKING","Back to thinking","1","2"],["2800","P1","THINKING","Thinking","1","2"],["2800","P0","ACQUIRING","Entered room; trying to take forks F0 and F1","0","2"],["2802","P0","ACQUIRING","Picked up left fork F0","0","2"],["2803","P0","ACQUIRING","Picked up right fork F1","0","2"],["2803","P3","THINKING","Back to thinking","3","2"],["2804","P3","THINKING","Thinking","3","2"],["2805","P0","EATING","Eating meal 3 of 3","0","3"],["3051","P1","HUNGRY","Hungry; trying to enter room","1","2"],["3054","P1","ACQUIRING","Entered room; trying to take forks F1 and F2","1","2"],["3067","P3","HUNGRY","Hungry; trying to enter room","3","2"],["3411","P2","RELEASING","Put down right fork F3","2","2"],["3413","P1","ACQUIRING","Picked up left fork F1","1","2"],["3414","P0","RELEASING","Put down right fork F1","0","3"],["3414","P1","ACQUIRING","Picked up right fork F2","1","2"],["3415","P1","EATING","Eating meal 3 of 3","1","3"],["3416","P2","RELEASING","Put down left fork F2","2","2"],["3416","P0","RELEASING","Put down left fork F0","0","3"],["3417","P0","THINKING","Back to thinking","0","3"],["3417","P3","ACQUIRING","Entered room; trying to take forks F3 and F0","3","2"],["3418","P2","THINKING","Back to thinking","2","2"],["3419","P2","THINKING","Thinking","2","2"],["3422","P3","ACQUIRING","Picked up left fork F3","3","2"],["3427","P3","ACQUIRING","Picked up right fork F0","3","2"],["3430","P0","FINISHED","Completed all meals","0","3"],["3431","P3","EATING","Eating meal 3 of 3","3","3"],["3677","P2","HUNGRY","Hungry; trying to enter room","2","2"],["3679","P2","ACQUIRING","Entered room; trying to take forks F2 and F3","2","2"],["4021","P1","RELEASING","Put down right fork F2","1","3"],["4023","P2","ACQUIRING","Picked up left fork F2","2","2"],["4024","P1","RELEASING","Put down left fork F1","1","3"],["4028","P1","THINKING","Back to thinking","1","3"],["4030","P1","FINISHED","Completed all meals","1","3"],["4037","P3","RELEASING","Put down right fork F0","3","3"],["4040","P2","ACQUIRING","Picked up right fork F3","2","2"],["4041","P2","EATING","Eating meal 3 of 3","2","3"],["4042","P3","RELEASING","Put down left fork F3","3","3"],["4044","P3","THINKING","Back to thinking","3","3"],["4045","P3","FINISHED","Completed all meals","3","3"],["4643","P2","RELEASING","Put down right fork F3","2","3"],["4646","P2","RELEASING","Put down left fork F2","2","3"],["4648","P2","THINKING","Back to thinking","2","3"],["4648","P2","FINISHED","Completed all meals","2","3"]], C={THINKING:'#6485ff',HUNGRY:'#f5a000',ACQUIRING:'#a64ff0',EATING:'#20a06b',RELEASING:'#f97316',FINISHED:'#64748b',INTERRUPTED:'#dc2626'};
+let idx=0,timer=null;
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('slider').max=Math.max(0,E.length-1);
+for(let i=0;i<4;i++){let a=(-90+i*90)*Math.PI/180,x=195+Math.cos(a)*137,y=185+Math.sin(a)*137;
+$('people').innerHTML+=`<g id="p${i}" class="person"><circle cx="${x}" cy="${y}" r="31" fill="#6485ff"/><text x="${x}" y="${y-2}" text-anchor="middle" fill="white" font-weight="bold">P${i}</text><text id="ps${i}" x="${x}" y="${y+12}" text-anchor="middle" fill="white" font-size="9">THINKING</text></g>`;
+let fx=195+Math.cos(a+Math.PI/4)*92,fy=185+Math.sin(a+Math.PI/4)*92;
+$('forks').innerHTML+=`<g id="f${i}"><line x1="${fx-9}" y1="${fy-9}" x2="${fx+9}" y2="${fy+9}" stroke="#9aa6b8" stroke-width="6" stroke-linecap="round"/><text x="${fx+9}" y="${fy-10}" font-size="10" fill="#334155">F${i}(P${i})</text></g>`;
 }
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function draw(){
- index=Math.max(0,Math.min(index,events.length-1));slider.value=index;
- const e=events[index]||['0','—','READY','No events yet'];
- document.getElementById('counter').textContent=`Event ${index+1} / ${events.length}`;
- document.getElementById('status').textContent=`${e[1]} · ${e[2]} · ${e[3]}`;
- const states=['THINKING','THINKING','THINKING','THINKING'],lastMeal=[0,0,0,0];
- for(let k=0;k<=index;k++){const r=events[k],id=Number(r[4]);states[id]=r[2];lastMeal[id]=Number(r[5]);}
- document.getElementById('current').innerHTML=states.map((s,i)=>`<p><b>P${i}</b> — <span style="color:${colors[s]||'#333'}">${s}</span> · Meals completed: ${lastMeal[i]}</p>`).join('');
- const eating=states.filter(s=>s==='EATING').length;
- document.getElementById('permit').textContent=eating?'Eating permit: occupied by one philosopher.':'Eating permit: available.';
- for(let i=0;i<4;i++){const circle=nodes.querySelector('#p'+i+' circle');circle.setAttribute('fill',colors[states[i]]||'#9aa5b5');nodes.querySelector('#s'+i).textContent=states[i];}
- document.getElementById('log').innerHTML=events.slice(0,index+1).slice(-80).reverse().map(r=>`<tr class="${r===e?'active':''}"><td>${r[0]} ms</td><td>${r[1]}</td><td>${r[2]}</td><td>${esc(r[3])}</td></tr>`).join('');
- const starts=Array(4).fill(null),segments=Array.from({length:4},()=>[]);
- events.slice(0,index+1).forEach((r,k)=>{const id=Number(r[4]);if(starts[id]!==null){const st=starts[id];segments[id].push({a:st,b:k,c:colors[events[st][2]]||'#9aa5b5'});starts[id]=null;}if(['WAITING','PICKING','EATING','THINKING','FINISHED'].includes(r[2]))starts[id]=k;});
- const max=Math.max(1,events.length-1);
- document.getElementById('timeline').innerHTML=segments.map((segs,i)=>`<div class="lane"><b>P${i}</b><div class="track">${segs.map(s=>`<span class="segment" style="left:${s.a/max*100}%;width:${Math.max(.8,(s.b-s.a+1)/max*100)}%;background:${s.c}"></span>`).join('')}</div><span>${states[i]}</span></div>`).join('');
+idx=Math.max(0,Math.min(idx,E.length-1));$('slider').value=idx;
+let s=Array(4).fill('THINKING'),m=Array(4).fill(0),held=Array.from({length:4},()=>[]);
+for(let k=0;k<=idx;k++){let r=E[k],p=+r[4];s[p]=r[2];m[p]=+r[5];
+let msg=r[3],f=msg.match(/fork F(\d+)/i);
+if(f){let n=+f[1];if(/picked up|acquired/i.test(msg)){if(!held[p].includes(n))held[p].push(n);}if(/put down|released/i.test(msg))held[p]=held[p].filter(v=>v!==n);}
 }
-function stop(){if(timer){clearInterval(timer);timer=null;}document.getElementById('play').textContent='▶ Play';}
-document.getElementById('play').onclick=()=>{if(timer){stop();return;}if(index>=events.length-1)index=0;document.getElementById('play').textContent='❚❚ Pause';timer=setInterval(()=>{if(index>=events.length-1){stop();return;}index++;draw();},Number(document.getElementById('speed').value));};
-document.getElementById('step').onclick=()=>{stop();if(index<events.length-1)index++;draw();};
-document.getElementById('reset').onclick=()=>{stop();index=0;draw();};
-slider.oninput=()=>{stop();index=Number(slider.value);draw();};
+let forks=Array(4).fill(-1);held.forEach((a,p)=>a.forEach(f=>forks[f]=p));
+$('pt').innerHTML=s.map((v,p)=>`<tr><td>P${p}</td><td><span class="pill" style="background:${C[v]||'#64748b'}">${v}</span></td><td>${held[p].length?held[p].map(f=>'F'+f).join(', '):'-'}</td><td>${m[p]}</td></tr>`).join('');
+$('ft').innerHTML=forks.map((p,f)=>`<tr><td>F${f}</td><td>${p<0?'free':'held by P'+p}</td></tr>`).join('');
+for(let p=0;p<4;p++){let g=$('p'+p);g.querySelector('circle').setAttribute('fill',C[s[p]]||'#64748b');$('ps'+p).textContent=s[p];}
+for(let f=0;f<4;f++){$('f'+f).querySelector('line').setAttribute('stroke',forks[f]<0?'#9aa6b8':C.ACQUIRING);}
+let eat=s.filter(v=>v==='EATING').length;
+$('deadlock').textContent=eat?'Deadlock check: not deadlocked; '+eat+' philosopher(s) eating':'Deadlock check: not deadlocked at this moment';
+$('time').textContent=(E[idx]?.[0]||0)+' / '+(E[E.length-1]?.[0]||0)+' ms';
+$('log').innerHTML=E.slice(0,idx+1).map((r,k)=>`<div class="line ${k===idx?'selected':''}" data-i="${k}">[ ${r[0]} ms ] ${r[1]} ${r[2]} ${r[3]}</div>`).join('');
+$('log').scrollTop=$('log').scrollHeight;
+let max=Math.max(1,E.length-1);
+$('timeline').innerHTML=Array.from({length:4},(_,p)=>{let last=null,segs=[];
+E.slice(0,idx+1).forEach((r,k)=>{if(+r[4]!==p)return;if(last===null)last=k;else{segs.push({a:last,b:k,c:C[E[last][2]]||'#64748b'});last=null;}});
+return `<div class="timeline"><span>P${p}</span><div class="track">${segs.map(z=>`<i class="seg" style="left:${z.a/max*100}%;width:${Math.max(.5,(z.b-z.a+1)/max*100)}%;background:${z.c}"></i>`).join('')}<i class="now" style="left:${idx/max*100}%"></i></div></div>`}).join('');
+}
+function stop(){if(timer)clearInterval(timer);timer=null;$('play').textContent='▶ Play';}
+$('play').onclick=()=>{if(timer){stop();return}if(idx>=E.length-1)idx=0;$('play').textContent='❚❚ Pause';
+timer=setInterval(()=>{if(idx>=E.length-1){stop();return}idx++;draw()},500/Math.max(.5,parseFloat($('speed').value)||1));};
+$('step').onclick=()=>{stop();idx=Math.min(E.length-1,idx+1);draw()};
+$('reset').onclick=()=>{stop();idx=0;draw()};
+$('slider').oninput=()=>{stop();idx=+$('slider').value;draw()};
+$('log').onclick=e=>{let n=e.target.closest('[data-i]');if(n){stop();idx=+n.dataset.i;draw()}};
 draw();
 </script></body></html>
